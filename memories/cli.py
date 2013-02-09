@@ -24,6 +24,7 @@ from docopt import docopt
 from memories.version import __package_version__, __package_name__
 import lmdb
 import sys
+import select
 
 def remember(arguments, db):
     for line in sys.stdin:
@@ -46,9 +47,10 @@ def forget(arguments, db):
 
 def main():
     arguments = docopt(__doc__, version="{0} {1}".format(__package_name__, __package_version__))
-    env = lmdb.Environment(arguments['DB'], subdir=False, map_size=2*1024*1024*1024)
-    txn = lmdb.Transaction(env)
-    for key in arguments.keys():
-        if key in globals() and arguments[key]:
-            globals()[key](arguments, txn.open())
-    txn.commit()
+    if select.select([sys.stdin,],[],[],0.0)[0]:
+        env = lmdb.Environment(arguments['DB'], subdir=False, map_size=2*1024*1024*1024)
+        txn = lmdb.Transaction(env)
+        for key in arguments.keys():
+            if key in globals() and arguments[key]:
+                globals()[key](arguments, txn.open())
+        txn.commit()
