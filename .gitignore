@@ -2,3 +2,6 @@ Memories.egg-info
 build
 dist
 *.pyc
+test/.new
+test/.testdb
+test/.testdb-lock
